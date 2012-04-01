@@ -1,0 +1,3 @@
+function sayDay() {
+	alert("Hello");
+	}

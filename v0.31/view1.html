@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+
+	<meta charset="utf-8">
+	<title>jQuery UI Sortable - Connect lists</title>
+	<script src="js/jquery-1.7.1.js"></script>
+	<script src="js/jquery.ui.core.js"></script>
+	<script src="js/jquery.ui.widget.js"></script>
+	<script src="js/jquery.ui.mouse.js"></script>
+	<script src="js/jquery.ui.sortable.js"></script>
+	<script src="js/model.js"></script>
+	<script src="js/view.js"></script>
+	<script src="js/controller.js"></script>
+	<link rel="stylesheet" href="css/style.css">
+	
+	<script>
+
+		function newDay() {
+			//var day_created;
+			
+			var day_created = model.addDay(8,0);
+			//alert ("new day is: " + (model.days.length-1));
+			//alert ("new day is2: " + model.days.length);
+			
+			
+			mainContainer = document.getElementById("main");
+			
+			dayField = document.createElement('div');
+			dayField.id = (model.days.length-1);
+			dayField.className = "wrapper-field";
+			mainContainer.appendChild(dayField);
+			
+			dayFieldTop = document.createElement('div');
+			dayFieldTop.className = "day-field-top";
+			dayField.appendChild(dayFieldTop);
+			
+			timeText = document.createElement('div');
+			timeText.className = "day-field-top-time";
+			
+			timeText.innerHTML = 	"<div id='start-time-field'>Start time: <span id='start-time' class='day-field-time'>08:00</span></div>"
+									+ "<div id='end-time-field'>End time: <span id='end-time' class='day-field-time'>08:00</span></div>"
+									+ "<div id='length-time-field' >Total length: <span id='total-length' class='day-field-time'>0 min</span></div>";
+			
+			dayFieldTop.appendChild(timeText);
+			
+			// The timegraph
+			timeGraph = document.createElement('div');
+			timeGraph.className = "time-graphics";
+			dayFieldTop.appendChild(timeGraph);
+			
+			breakLine = document.createElement('div');
+			breakLine.className = "break-line";
+			timeGraph.appendChild(breakLine);
+			
+			timeGPresentation = document.createElement('div');
+			timeGPresentation.className = "time-graphic-presentation";
+			timeGraph.appendChild(timeGPresentation);
+			timeGPresentation.id = "time-graphic-presentation"+(model.days.length-1);
+			
+			timeGGroupwork = document.createElement('div');
+			timeGGroupwork.className = "time-graphic-group_work";
+			timeGraph.appendChild(timeGGroupwork);
+			timeGGroupwork.id = "time-graphic-group_work"+(model.days.length-1);
+			
+			timeGDiscussion = document.createElement('div');
+			timeGDiscussion.className = "time-graphic-discussion";
+			timeGraph.appendChild(timeGDiscussion);
+			timeGDiscussion.id = "time-graphic-discussion"+(model.days.length-1);
+			
+			timeGBreak = document.createElement('div');
+			timeGBreak.className = "time-graphic-break";
+			timeGBreak.id = "time-graphic-break"+(model.days.length-1);
+	
+			timeGraph.appendChild(timeGBreak);
+		
+			
+			// The day
+			theDay = document.createElement('div');
+			theDay.className = "field-presentation";
+			list = document.createElement('ul');
+		    list.id = (model.days.length-1);
+			list.className = "connectedSortable";
+			//list.innerHTML = 	"<li class='activity break' id='act-XX'><span class='time'>1 hours</span><span class='activity-description'>Lunch</span></li></ul>";
+			theDay.appendChild(list);
+						
+			
+			dayField.appendChild(theDay);
+			
+			var new_day;
+			var old_day;
+			var start_pos;
+			var stop_pos;
+			$( ".connectedSortable" ).sortable({ 
+				receive: function(event, ui) { 
+				//change_box_values();
+				},
+				 
+				start: function(event, ui) {
+           		$(this).fromPosition = ui.item.index();
+				start_pos = ui.item.index();
+				old_day = (this).id;
+           		//alert("drag from day " + old_day + " from the position" + start_pos);
+           		},
+           		
+				over: function(event, ui) {
+				new_day = (this).id;
+           		},
+				
+           		remove: function(event, ui) {
+        	    stop_pos = ui.item.index();
+           		//alert("drop into day " + new_day + " in the position" + stop_pos);
+				
+
+				//alert ("old_day: " + old_day);
+				//alert ("new_day: " + new_day);
+				model.moveActivity(old_day, start_pos, new_day, stop_pos);
+				alert("total time: " + model.days[new_day].getTotalLength());
+				alert("end: " + model.days[new_day].getEnd());
+				alert("time presentation: " + model.days[new_day].getLengthByType("presentation"));
+				//change_box_values();
+           		},
+				
+				connectWith: ".connectedSortable"
+				
+			}).disableSelection();
+
+			}
+			
+		function open_win() {
+															
+			child = window.open('view2.html','','width=345,height=500');
+			}
+		
+			
+		function newActivity(v) {
+			
+			activity = new Activity(v[0], v[1], v[2], v[3]);
+			//alert(v[0] + v[1] + v[2] + v[3]);
+			model.addActivity(activity);
+			
+			
+			activityList = document.getElementById('null');
+			activityHolder = document.createElement('li');
+			activityHolder.className = activity._typeid;
+			activityList.appendChild(activityHolder);
+			
+			timeSpan = document.createElement('span');
+			timeSpan.className = 'time';
+			activityHolder.appendChild(timeSpan);
+
+			timeLabel = document.createElement('label');
+			timeLabel.innerHTML = activity._length + " mins";
+			timeSpan.appendChild(timeLabel);
+			
+			descriptionSpan = document.createElement('span');
+			descriptionSpan.className = "activity-description";
+			activityHolder.appendChild(descriptionSpan);
+
+			activityLabel = document.createElement('label');
+			activityLabel.innerHTML = activity._name;
+			descriptionSpan.appendChild(activityLabel);
+			
+			
+			}
+			
+	function change_box_values() {
+		//alert("hello");
+		//$.each(model.days, function(i) {
+			//alert(model.days[i]);
+		//});
+
+	//	$.each(ActivityType,function(index,type){
+	//	alert("Day '" + ActivityType[index] + "' Length: " +  model.days[i].getLengthByType(index) + " min");
+	//	}
+
+
+	//	$.each(model.days, function(i,day)) {
+			
+	//		$.each(ActivityType,function(j,type){
+	//		alert("Day '" + ActivityType[j] + "' Length: " +  day.getLengthByType(j));
+		//var end_time = document.getElementById("end-time");
+		//end_time.innerHTML (model.days[new_day].getEnd());
+	
+		document.getElementById('time-graphic-presentation').style.height = perc1 + '%';
+		document.getElementById('time-graphic-group_work').style.height = perc2 + '%';
+		document.getElementById('time-graphic-discussion').style.height = perc3 + '%';
+		document.getElementById('time-graphic-break').style.height = perc4 + '%';
+	}
+	$(newDay);
+	</script>
+	
+
+
+
+
+	</head>
+	
+	<body class="wrapper-top">
+	
+	<header>
+		<h1>Activity Planner</h1>
+	</header>
+		
+		<!--Where the activities are seen-->
+		<div id="activity-field" class="wrapper-field">
+			<div id="button-add-activity" class="green-button" onclick="open_win()">+ Add Activity</div>
+			<div id="activity-field-presentation" class="field-presentation">
+				<ul id="null" class="connectedSortable" ul="activiy-list-handler"></ul>
+			</div>			
+		</div>
+	  		
+		<div id="main">
+		
+		</div> 
+		
+		<div id="add-new-day-field" class="wrapper-field">
+			<div id="button-add-day" class="green-button" onclick="newDay()"> + Add New Day</div>
+		</div>
+	
+	
+	</body>
+</html>
